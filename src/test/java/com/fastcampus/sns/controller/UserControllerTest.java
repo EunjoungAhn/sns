@@ -45,7 +45,7 @@ public class UserControllerTest {
 
         mockMvc.perform(post("/api/v1/users/join")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new UserJoinRequest("name", "password"))))
+                        .content(objectMapper.writeValueAsBytes(new UserJoinRequest(userName, password))))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -59,7 +59,7 @@ public class UserControllerTest {
 
         mockMvc.perform(post("/api/v1/users/join")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new UserJoinRequest("name", "password"))))
+                        .content(objectMapper.writeValueAsBytes(new UserJoinRequest(userName, password))))
                 .andDo(print())
                 .andExpect(status().is(ErrorCode.DUPLICATED_USER_NAME.getStatus().value()));
     }
@@ -74,7 +74,7 @@ public class UserControllerTest {
 
         mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new UserLoginRequest("name", "password"))))
+                        .content(objectMapper.writeValueAsBytes(new UserLoginRequest(userName, password))))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -89,7 +89,7 @@ public class UserControllerTest {
 
         mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new UserLoginRequest("name", "password"))))
+                        .content(objectMapper.writeValueAsBytes(new UserLoginRequest(userName, password))))
                 .andDo(print())
                 .andExpect(status().is(ErrorCode.USER_NOT_FOUND.getStatus().value()));
     }
@@ -104,7 +104,7 @@ public class UserControllerTest {
 
         mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new UserLoginRequest("name", "password"))))
+                        .content(objectMapper.writeValueAsBytes(new UserLoginRequest(userName, password))))
                 .andDo(print())
                 .andExpect(status().is(ErrorCode.INVALID_PASSWORD.getStatus().value()));
     }
