@@ -2,6 +2,7 @@ package com.fastcampus.sns.model.entity;
 
 import com.fastcampus.sns.model.UserRole;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
@@ -10,53 +11,52 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 import java.time.Instant;
 
+
+@Setter
+@Getter
 @Entity
 @Table(name = "\"user\"")
-@Getter
-@Setter
-@SQLDelete(sql = "UPDATE \"user\" SET deleted_at = NOW() where id=?")
-@Where(clause = "deleted_at is NULL")
+@SQLDelete(sql = "UPDATE \"user\" SET removed_at = NOW() WHERE id=?")
+@Where(clause = "removed_at is NULL")
+@NoArgsConstructor
 public class UserEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Integer id = null;
 
-    @Column(name = "user_name")
+    @Column(name = "user_name", unique = true)
     private String userName;
 
-    @Column(name = "password")
     private String password;
 
-    @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private UserRole role = UserRole.USER;
 
-    @Column(name = "register_at")
+    @Column(name = "registered_at")
     private Timestamp registeredAt;
 
     @Column(name = "updated_at")
     private Timestamp updatedAt;
 
-    @Column(name = "deleted_at")
-    private Timestamp deletedAt;
+    @Column(name = "removed_at")
+    private Timestamp removedAt;
+
 
     @PrePersist
-    void registeredAt(){
+    void registeredAt() {
         this.registeredAt = Timestamp.from(Instant.now());
     }
 
     @PreUpdate
-    void updatedAt(){
+    void updatedAt() {
         this.updatedAt = Timestamp.from(Instant.now());
     }
 
-    // DB 변경 실수를 방지하기 위해서 Entity를 따로 만들어서 Service에서는 User(DTO)만 사용한다.
-    //그 변환을 위한 메소드
-    public static UserEntity of(String userName, String password){
-        UserEntity userEntity = new UserEntity();
-        userEntity.setUserName(userName);
-        userEntity.setPassword(password);
-        return userEntity;
+    public static UserEntity of(String userName, String encodedPwd) {
+        UserEntity entity = new UserEntity();
+        entity.setUserName(userName);
+        entity.setPassword(encodedPwd);
+        return entity;
     }
-
 }

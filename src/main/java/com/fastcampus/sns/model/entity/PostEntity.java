@@ -1,7 +1,7 @@
 package com.fastcampus.sns.model.entity;
 
-import com.fastcampus.sns.model.UserRole;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
@@ -10,16 +10,18 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 import java.time.Instant;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "\"post\"")
-@Getter
-@Setter
-@SQLDelete(sql = "UPDATE \"post\" SET deleted_at = NOW() where id=?")
-@Where(clause = "deleted_at is NULL")
+@SQLDelete(sql = "UPDATE \"post\" SET removed_at = NOW() WHERE id=?")
+@Where(clause = "removed_at is NULL")
+@NoArgsConstructor
 public class PostEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Integer id = null;
 
     @Column(name = "title")
     private String title;
@@ -28,26 +30,34 @@ public class PostEntity {
     private String body;
 
     @ManyToOne
-    @JoinColumn(name = "user_id") //user entity를 join해서 가져온다.
-    private UserRole user;
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
 
-    @Column(name = "register_at")
+    @Column(name = "registered_at")
     private Timestamp registeredAt;
 
     @Column(name = "updated_at")
     private Timestamp updatedAt;
 
-    @Column(name = "deleted_at")
-    private Timestamp deletedAt;
+    @Column(name = "removed_at")
+    private Timestamp removedAt;
+
 
     @PrePersist
-    void registeredAt(){
+    void registeredAt() {
         this.registeredAt = Timestamp.from(Instant.now());
     }
 
     @PreUpdate
-    void updatedAt(){
+    void updatedAt() {
         this.updatedAt = Timestamp.from(Instant.now());
     }
 
+    public static PostEntity of(String title, String body, UserEntity userEntity) {
+        PostEntity entity = new PostEntity();
+        entity.setTitle(title);
+        entity.setBody(body);
+        entity.setUser(userEntity);
+        return entity;
+    }
 }
