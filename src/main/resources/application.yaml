@@ -12,3 +12,8 @@ spring.datasource:
   password: 6e8d24aa42ee02fb3fb8ed86b0dbfeb7d8a96a3cb46b0b3a966fb991e3db9065
   platform: postgres
   driver-class-name: org.postgresql.Driver
+
+jwt:
+  secret-key: fast_campus.sns-application-2022.secret_key
+  #30 days
+  token.expired-time-ms: 2592000000

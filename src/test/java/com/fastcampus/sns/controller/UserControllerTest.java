@@ -6,7 +6,6 @@ import com.fastcampus.sns.exception.ErrorCode;
 import com.fastcampus.sns.exception.SnsApplicationException;
 import com.fastcampus.sns.model.User;
 import com.fastcampus.sns.service.UserService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.mock;
@@ -30,88 +29,83 @@ public class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @MockBean
+    UserService userService;
+
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
-    private UserService userService;
-
     @Test
+    @WithAnonymousUser
     public void 회원가입() throws Exception {
-        String userName = "userName";
+        String userName = "name";
         String password = "password";
 
-        //mocking
         when(userService.join(userName, password)).thenReturn(mock(User.class));
 
         mockMvc.perform(post("/api/v1/users/join")
-                .contentType(MediaType.APPLICATION_JSON)
-                //add request body
-                .content(objectMapper.writeValueAsBytes(new UserJoinRequest(userName, password)))
-                ).andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(new UserJoinRequest("name", "password"))))
+                .andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void 회원가입시_이미_회원가입된_userName으로_회원가입을_하는경우_에러반환() throws Exception{
-        String userName = "userName";
+    @WithAnonymousUser
+    public void 회원가입시_같은_아이디로_회원가입하면_에러발생() throws Exception {
+        String userName = "name";
         String password = "password";
-
-        when(userService.join(userName, password)).thenThrow(new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, ""));
+        when(userService.join(userName, password)).thenThrow(new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME));
 
         mockMvc.perform(post("/api/v1/users/join")
                         .contentType(MediaType.APPLICATION_JSON)
-                        //TODO: add request body
-                        .content(objectMapper.writeValueAsBytes(new UserJoinRequest(userName, password)))
-                ).andDo(print())
-                .andExpect(status().isConflict());
+                        .content(objectMapper.writeValueAsBytes(new UserJoinRequest("name", "password"))))
+                .andDo(print())
+                .andExpect(status().is(ErrorCode.DUPLICATED_USER_NAME.getStatus().value()));
     }
 
     @Test
+    @WithAnonymousUser
     public void 로그인() throws Exception {
-        String userName = "userName";
+        String userName = "name";
         String password = "password";
 
-        //mocking
-        when(userService.login(userName, password)).thenReturn("test_token");
+        when(userService.login(userName, password)).thenReturn("testToken");
 
         mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        //add request body
-                        .content(objectMapper.writeValueAsBytes(new UserLoginRequest(userName, password)))
-                ).andDo(print())
+                        .content(objectMapper.writeValueAsBytes(new UserLoginRequest("name", "password"))))
+                .andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void 로그인시_회원가입이_안된_userName을_입력할경우_에러반환() throws Exception {
-        String userName = "userName";
+    @WithAnonymousUser
+    public void 로그인시_회원가입한적이_없다면_에러발생() throws Exception {
+        String userName = "name";
         String password = "password";
 
-        //mocking
-        when(userService.login(userName, password)).thenThrow(new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, ""));
+        when(userService.login(userName, password)).thenThrow(new SnsApplicationException(ErrorCode.USER_NOT_FOUND));
 
         mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        //add request body
-                        .content(objectMapper.writeValueAsBytes(new UserLoginRequest(userName, password)))
-                ).andDo(print())
-                .andExpect(status().isNotFound());
+                        .content(objectMapper.writeValueAsBytes(new UserLoginRequest("name", "password"))))
+                .andDo(print())
+                .andExpect(status().is(ErrorCode.USER_NOT_FOUND.getStatus().value()));
     }
 
     @Test
-    public void 로그인시_틀린_password를_입력할경우_에러반환() throws Exception {
-        String userName = "userName";
+    @WithAnonymousUser
+    public void 로그인시_비밀번호가_다르면_에러발생() throws Exception {
+        String userName = "name";
         String password = "password";
 
-        //mocking
-        when(userService.login(userName, password)).thenThrow(new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, ""));
+        when(userService.login(userName, password)).thenThrow(new SnsApplicationException(ErrorCode.INVALID_PASSWORD));
 
         mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        //add request body
-                        .content(objectMapper.writeValueAsBytes(new UserLoginRequest(userName, password)))
-                ).andDo(print())
-                .andExpect(status().isUnauthorized());
+                        .content(objectMapper.writeValueAsBytes(new UserLoginRequest("name", "password"))))
+                .andDo(print())
+                .andExpect(status().is(ErrorCode.INVALID_PASSWORD.getStatus().value()));
     }
 }
