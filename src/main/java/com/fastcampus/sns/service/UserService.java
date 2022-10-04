@@ -6,7 +6,9 @@ import com.fastcampus.sns.model.User;
 import com.fastcampus.sns.model.entity.UserEntity;
 import com.fastcampus.sns.repository.UserEntityRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -15,17 +17,20 @@ import java.util.Optional;
 public class UserService {
 
     private final UserEntityRepository userEntityRepository;
+    private final BCryptPasswordEncoder encoder;
 
     // 회원가입 메소드
+    @Transactional
     public User join(String userName, String password){
         // 회원가입하려는 userNmae으로 회원가입된 user가 있는지
         userEntityRepository.findByUserName(userName).ifPresent(it -> {
-            throw new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, String.format("%s is duplicated"));
+            throw new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, String.format("%s is duplicated", userName));
         });
 
         // 회원가입 진행 = user를 등록
-        UserEntity userEntity = userEntityRepository.save(UserEntity.of(userName, password));
-        return User.formEntity(userEntity);
+        UserEntity userEntity = userEntityRepository.save(UserEntity.of(userName, encoder.encode(password)));
+        throw new RuntimeException();
+        //return User.formEntity(userEntity);
     }
 
     //로그인이 성공했다면 그에 맞는 토큰을 반환하는 메소드

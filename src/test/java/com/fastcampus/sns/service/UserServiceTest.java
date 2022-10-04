@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Optional;
 
@@ -25,6 +26,9 @@ public class UserServiceTest {
     @MockBean
     private UserEntityRepository userEntityRepository;
 
+    @MockBean
+    private BCryptPasswordEncoder encoder;
+
     @Test
     void 회원가입이_정상적으로_동작하는_경우() {
         String userName = "userName";
@@ -32,6 +36,7 @@ public class UserServiceTest {
 
         // mocking - DB에서 찾으면 User가 없어야 정상 가입이 되므로 Optional.empty();
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.empty());
+        when(encoder.encode(password)).thenReturn("encrypt_password");
         when(userEntityRepository.save(any())).thenReturn(Optional.of(UserEntityFixture.get(userName, password)));
 
         Assertions.assertDoesNotThrow(() -> userService.join(userName, password));
@@ -45,6 +50,7 @@ public class UserServiceTest {
 
         // mocking
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(fixture));
+        when(encoder.encode(password)).thenReturn("encrypt_password");
         when(userEntityRepository.save(any())).thenReturn(Optional.of(fixture));
 
         // 회원가입 되있으므로, Exception을 반환해 주어야 한다.
