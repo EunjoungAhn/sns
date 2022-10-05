@@ -139,7 +139,7 @@ public class PostControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithAnonymousUser
     void 포스트삭제시_로그인하지_않은경우() throws Exception{
         mockMvc.perform(delete("/api/v1/posts/1")
                         .contentType(MediaType.APPLICATION_JSON))
