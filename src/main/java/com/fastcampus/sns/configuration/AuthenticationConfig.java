@@ -23,6 +23,11 @@ public class AuthenticationConfig extends WebSecurityConfigurerAdapter {
     private String key;
 
     @Override
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring().regexMatchers("^(?!/api/).*");
+    }
+
+    @Override
     public void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests()
