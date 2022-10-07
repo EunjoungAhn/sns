@@ -15,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class PostService {
@@ -90,5 +92,16 @@ public class PostService {
 
         //like save
         likeEntityRepository.save(LikeEntity.of(userEntity, postEntity));
+    }
+
+    @Transactional
+    public int likeCount(Integer postId){
+        //post 존재여부 확인
+        PostEntity postEntity = postEntityRepository.findById(postId).orElseThrow(() ->
+                new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+        //like 갯수 가져오기
+        //List<LikeEntity> likeEntities = likeEntityRepository.findAllByPost(postEntity);
+        //return likeEntities.size();
+        return likeEntityRepository.countByPost(postEntity);
     }
 }
