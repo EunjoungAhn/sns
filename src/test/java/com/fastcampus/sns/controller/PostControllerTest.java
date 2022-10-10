@@ -3,7 +3,6 @@ package com.fastcampus.sns.controller;
 import com.fastcampus.sns.controller.request.PostCommentRequest;
 import com.fastcampus.sns.controller.request.PostCreateRequest;
 import com.fastcampus.sns.controller.request.PostModifyRequest;
-import com.fastcampus.sns.controller.request.UserJoinRequest;
 import com.fastcampus.sns.exception.ErrorCode;
 import com.fastcampus.sns.exception.SnsApplicationException;
 import com.fastcampus.sns.fixture.PostEntityFixture;
@@ -34,38 +33,32 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class PostControllerTest {
 
     @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private PostService postService;
+    PostService postService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     @WithMockUser
-    void 포스트작성() throws Exception{
-        String title = "title";
-        String body = "body";
-
+    void 포스트작성() throws Exception {
         mockMvc.perform(post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new PostCreateRequest(title, body))))
+                        .content(objectMapper.writeValueAsBytes(new PostCreateRequest("title", "body"))))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
     @WithAnonymousUser
-    void 포스트작성시_로그인하지않은경우() throws Exception{
-        String title = "title";
-        String body = "body";
-
+    void 포스트작성시_로그인한상태가_아니라면_에러발생() throws Exception {
         mockMvc.perform(post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new PostCreateRequest(title, body))))
+                        .content(objectMapper.writeValueAsBytes(new PostCreateRequest("title", "body"))))
                 .andDo(print())
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().is(ErrorCode.INVALID_TOKEN.getStatus().value()));
     }
 
     @Test
@@ -175,81 +168,85 @@ public class PostControllerTest {
 
     @Test
     @WithMockUser
-    void 피드목록() throws Exception{
-        //mocking
+    void 피드목록() throws Exception {
+        // mocking
         when(postService.list(any())).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/v1/posts")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
     @WithAnonymousUser
-    void 피드목록요청시_로그인하지_않은경우() throws Exception{
-        //mocking
+    void 피드목록요청시_로그인하지_않은경우() throws Exception {
+        // mocking
         when(postService.list(any())).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/v1/posts")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     @WithMockUser
-    void 내피드목록() throws Exception{
-        //mocking
+    void 내피드목록() throws Exception {
+        // mocking
         when(postService.my(any(), any())).thenReturn(Page.empty());
-
         mockMvc.perform(get("/api/v1/posts/my")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
     @WithAnonymousUser
-    void 내피드목록요청시_로그인하지_않은경우() throws Exception{
-        //mocking
+    void 내피드목록요청시_로그인하지_않은경우() throws Exception {
+        // mocking
         when(postService.my(any(), any())).thenReturn(Page.empty());
-
         mockMvc.perform(get("/api/v1/posts/my")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
                 .andExpect(status().isUnauthorized());
     }
 
+    /**
+     * 좋아요 기능
+     */
+
     @Test
     @WithMockUser
-    void 좋아요기능() throws Exception{
+    void 좋아요기능() throws Exception {
         mockMvc.perform(post("/api/v1/posts/1/likes")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
     @WithAnonymousUser
-    void 좋아요버튼클릭시_로그인하지_않은경우() throws Exception{
+    void 좋아요클릭시_로그인하지_않은경우() throws Exception {
         mockMvc.perform(post("/api/v1/posts/1/likes")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     @WithMockUser
-    void 좋아요버튼클릭시_게시물이_없는경우() throws Exception{
-        //mocking
+    void 좋아요클릭시_게시물이_없는경우() throws Exception {
         doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).like(any(), any());
-
         mockMvc.perform(post("/api/v1/posts/1/likes")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
                 .andExpect(status().isNotFound());
     }
+
+    /**
+     * 코멘트 기능
+     */
 
     @Test
     @WithMockUser
@@ -282,6 +279,4 @@ public class PostControllerTest {
                 ).andDo(print())
                 .andExpect(status().isNotFound());
     }
-
-
 }
