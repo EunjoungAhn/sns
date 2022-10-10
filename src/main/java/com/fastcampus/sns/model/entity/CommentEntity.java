@@ -13,7 +13,9 @@ import java.time.Instant;
 @Setter
 @Getter
 @Entity
-@Table(name = "\"comment\"")
+@Table(name = "\"comment\"", indexes = {
+        @Index(name = "post_id_idx", columnList = "post_id")
+})
 @SQLDelete(sql = "UPDATE \"comment\" SET removed_at = NOW() WHERE id=?")
 @Where(clause = "removed_at is NULL")
 @NoArgsConstructor

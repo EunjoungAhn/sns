@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PostEntityRepository extends JpaRepository<PostEntity, Integer> {
-
+    //검색을 할때 인덱스가 없으면 굉장히 느린 속도를 가지게 된다.
     Page<PostEntity> findAllByUser(UserEntity entity, Pageable pageable);
 }
