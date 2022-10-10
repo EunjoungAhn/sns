@@ -107,7 +107,7 @@ public class PostService {
         UserEntity userEntity = getUserOrException(userName);
 
         // comment save
-        commentEntityRepository.save(CommentEntity.of(userEntity, postEntity, comment));
+        commentEntityRepository.save(CommentEntity.of(comment, postEntity, userEntity));
 
         //alarm save
         alarmEntityRepository.save(AlarmEntity.of(postEntity.getUser(), AlarmType.NEW_COMMENT_ON_POST, new AlarmArgs(userEntity.getId(), postEntity.getId())));

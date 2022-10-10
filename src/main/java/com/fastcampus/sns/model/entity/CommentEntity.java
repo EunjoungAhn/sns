@@ -13,9 +13,7 @@ import java.time.Instant;
 @Setter
 @Getter
 @Entity
-@Table(name = "\"comment\"", indexes = {
-        @Index(name = "post_id_idx", columnList = "post_id")
-})
+@Table(name = "\"comment\"")
 @SQLDelete(sql = "UPDATE \"comment\" SET removed_at = NOW() WHERE id=?")
 @Where(clause = "removed_at is NULL")
 @NoArgsConstructor
@@ -25,6 +23,9 @@ public class CommentEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id = null;
 
+    @Column(name = "comment")
+    private String comment;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserEntity user;
@@ -32,9 +33,6 @@ public class CommentEntity {
     @ManyToOne
     @JoinColumn(name = "post_id")
     private PostEntity post;
-
-    @Column(name = "comment")
-    private String comment;
 
     @Column(name = "registered_at")
     private Timestamp registeredAt;
@@ -56,11 +54,11 @@ public class CommentEntity {
         this.updatedAt = Timestamp.from(Instant.now());
     }
 
-    public static CommentEntity of(UserEntity userEntity, PostEntity postEntity, String comment) {
+    public static CommentEntity of(String comment, PostEntity post, UserEntity user) {
         CommentEntity entity = new CommentEntity();
-        entity.setUser(userEntity);
-        entity.setPost(postEntity);
         entity.setComment(comment);
+        entity.setPost(post);
+        entity.setUser(user);
         return entity;
     }
 }

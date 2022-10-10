@@ -1,7 +1,6 @@
 package com.fastcampus.sns.model;
 
 import com.fastcampus.sns.model.entity.CommentEntity;
-import com.fastcampus.sns.model.entity.PostEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,7 +11,8 @@ import java.sql.Timestamp;
 public class Comment {
     private Integer id;
     private String comment;
-    private String username;
+    private Integer userId;
+    private String userName;
     private Integer postId;
     private Timestamp registeredAt;
     private Timestamp updatedAt;
@@ -22,6 +22,7 @@ public class Comment {
         return new Comment(
                 entity.getId(),
                 entity.getComment(),
+                entity.getUser().getId(),
                 entity.getUser().getUserName(),
                 entity.getPost().getId(),
                 entity.getRegisteredAt(),
