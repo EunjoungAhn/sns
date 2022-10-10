@@ -18,7 +18,9 @@ import java.time.Instant;
 @Setter
 @Getter
 @Entity
-@Table(name = "\"alarm\"")
+@Table(name = "\"alarm\"", indexes = {
+        @Index(name = "user_id_idx", columnList = "user_id")
+})
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @SQLDelete(sql = "UPDATE \"alarm\" SET removed_at = NOW() WHERE id=?")
 @Where(clause = "removed_at is NULL")

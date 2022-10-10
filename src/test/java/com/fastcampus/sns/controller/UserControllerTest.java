@@ -115,23 +115,22 @@ public class UserControllerTest {
 
     @Test
     @WithMockUser
-    void 알람기능() throws Exception{
-        //mocking
+    void 알람기능() throws Exception {
         when(userService.alarmList(any(), any())).thenReturn(Page.empty());
-        mockMvc.perform(get("/api/vi/users/alaram")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
+        mockMvc.perform(get("/api/v1/users/alarm")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
                 .andExpect(status().isOk());
     }
 
+
     @Test
     @WithAnonymousUser
-    void 알람리스트요청시_로그인하지_않은경우() throws Exception{
-        //mocking
+    void 알람기능시_로그인하지_않은경우() throws Exception {
         when(userService.alarmList(any(), any())).thenReturn(Page.empty());
-        mockMvc.perform(get("/api/vi/users/alaram")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/users/alarm")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isUnauthorized());
     }
 }
