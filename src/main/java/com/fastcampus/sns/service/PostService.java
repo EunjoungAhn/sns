@@ -2,6 +2,7 @@ package com.fastcampus.sns.service;
 
 import com.fastcampus.sns.exception.ErrorCode;
 import com.fastcampus.sns.exception.SnsApplicationException;
+import com.fastcampus.sns.model.Comment;
 import com.fastcampus.sns.model.Post;
 import com.fastcampus.sns.model.entity.CommentEntity;
 import com.fastcampus.sns.model.entity.LikeEntity;
@@ -41,7 +42,7 @@ public class PostService {
     public Post modify(String title, String body, String userName, Integer postId){
         UserEntity userEntity = getUserOrException(userName);
         //post 존재여부
-        PostEntity postEntity = getPostOrException(postId);
+        PostEntity postEntity = getPostEntityOrException(postId);
 
         //수정하려는 사람이 post 작성자인지 확인
         if(postEntity.getUser() != userEntity){
@@ -58,7 +59,7 @@ public class PostService {
     public void delete(String userName, Integer postId){
         UserEntity userEntity = getUserOrException(userName);
         //post 존재여부 확인
-        PostEntity postEntity = getPostOrException(postId);
+        PostEntity postEntity = getPostEntityOrException(postId);
         //post 작성자인지 확인
         if(postEntity.getUser() != userEntity){
             throw new SnsApplicationException(ErrorCode.INVALID_PERMISSION, String.format("%s has no permission with %s", userName, postId));
@@ -79,7 +80,7 @@ public class PostService {
     @Transactional
     public void like(Integer postId, String userName){
         //post 존재여부 확인
-        PostEntity postEntity = getPostOrException(postId);
+        PostEntity postEntity = getPostEntityOrException(postId);
         UserEntity userEntity = getUserOrException(userName);
         //한 사람이 한번만 like 하도록 체크
         likeEntityRepository.findByUserAndPost(userEntity, postEntity).ifPresent(it -> {
@@ -93,7 +94,7 @@ public class PostService {
     @Transactional
     public int likeCount(Integer postId){
         //post 존재여부 확인
-        PostEntity postEntity = getPostOrException(postId);
+        PostEntity postEntity = getPostEntityOrException(postId);
         //like 갯수 가져오기
         //List<LikeEntity> likeEntities = likeEntityRepository.findAllByPost(postEntity);
         //return likeEntities.size();
@@ -102,16 +103,21 @@ public class PostService {
 
     @Transactional
     public void comment(Integer postId, String userName, String comment){
-        PostEntity postEntity = getPostOrException(postId);
+        PostEntity postEntity = getPostEntityOrException(postId);
         UserEntity userEntity = getUserOrException(userName);
 
         // comment save
         commentEntityRepository.save(CommentEntity.of(userEntity, postEntity, comment));
     }
 
+    public Page<Comment> getComments(Integer postId, Pageable pageable){
+        PostEntity postEntity = getPostEntityOrException(postId);
+        return commentEntityRepository.findAllByPost(postEntity, pageable).map(Comment::fromEntity);
+    }
+
     //반복되는 코드는 내부에서만 처리하는 메소드로 만들어서 코드 깔끔하게 정리
     //post 존재여부 확인
-    private PostEntity getPostOrException(Integer postId){
+    private PostEntity getPostEntityOrException(Integer postId){
         return postEntityRepository.findById(postId).orElseThrow(() ->
                 new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
     }
