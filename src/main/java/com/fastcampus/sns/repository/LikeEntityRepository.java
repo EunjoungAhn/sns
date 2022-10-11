@@ -21,7 +21,9 @@ public interface LikeEntityRepository extends JpaRepository<LikeEntity, Integer>
 
     // select count(*) from "like" where post_id = 2 아래의 쿼리문을 해석했을때
     // 아래의 작업이 쿼리가 훨신 가볍게 동작한다.
-    @Query(value = "SELECT COUNT(*) FROM LikeEntity entity WHERE entity.post =:post")
-    Integer countByPost(@Param("post") PostEntity post);
+//    @Query(value = "SELECT COUNT(*) FROM LikeEntity entity WHERE entity.post =:post")
+//    Integer countByPost(@Param("post") PostEntity post);
+
+    long countByPost(PostEntity post);
 
 }

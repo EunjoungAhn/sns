@@ -31,8 +31,8 @@ public class AlarmEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id = null;
 
-    // 알름을 받은 사람
-    @ManyToOne
+    // 알람을 받은 사람
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserEntity user;
 

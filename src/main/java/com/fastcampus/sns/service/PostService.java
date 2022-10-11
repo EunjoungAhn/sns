@@ -92,7 +92,7 @@ public class PostService {
     }
 
     @Transactional
-    public int likeCount(Integer postId){
+    public long likeCount(Integer postId){
         //post 존재여부 확인
         PostEntity postEntity = getPostEntityOrException(postId);
         //like 갯수 가져오기
